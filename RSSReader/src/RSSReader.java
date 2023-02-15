@@ -241,7 +241,7 @@ public final class RSSReader {
 
         // Prints out more opening tags
         idx.println("</head>");
-        idx.println("<body>");
+        idx.println("<body>"):
 
         idx.println("<h1><a href = " + "https://www.espn.com/nba/>"
                 + "ESPN.com - NBA" + "</a></h1>");
