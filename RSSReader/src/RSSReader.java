@@ -219,10 +219,11 @@ public final class RSSReader {
         SimpleReader in = new SimpleReader1L();
         SimpleWriter out = new SimpleWriter1L();
 
-        out.println("Enter feed list: ");
-        XMLTree source = new XMLTree1(in.nextLine());
+        //out.println("Enter feed list: ");
+        //XMLTree source = new XMLTree1(in.nextLine());
+        XMLTree source = new XMLTree1("https://www.espn.com/espn/rss/nba/news");
         XMLTree channel = source.child(0);
-        source.display();
+        //source.display();
 
         String file = "index.html";
         SimpleWriter idx = new SimpleWriter1L(file);
@@ -242,16 +243,24 @@ public final class RSSReader {
         idx.println("</head>");
         idx.println("<body>");
 
-        idx.println("<h1>" + "www.espn.com - NBA" + "</h1>");
+        idx.println("<h1><a href = " + "https://www.espn.com/nba/>"
+                + "ESPN.com - NBA" + "</a></h1>");
         idx.println("<p>" + "Latest NBA news from www.espn.com" + "</p>");
+        idx.println("<table border = " + "1>");
+        idx.println(
+                "<tbody> <tr> <th> Date </th> <th> Source </th> <th> News </th> </tr>");
+        idx.println(
+                "<tr> <td> Wed, 15 Feb 2023 07:42:00 EST </td> <td> ESPN </td> <td> <a href="
+                        + "https://www.espn.com/nba/story/_/id/35662824/bucks-giannis-antetokounmpo-says-top-seed-matter"
+                        + "> Giannis Antetokounmpo helped the Bucks roll past the Celtics in overtime in a </a> </td></tr> ");
         int k = 0;
-        while (k < channel.numberOfChildren()) {
-            String file1 = channel.child(k).attributeValue("link");
-            String name = channel.child(k).attributeValue("title");
-            idx.println("<li><a href=\"" + file1 + "\">" + name + "</a></li>");
-            k++;
-        }
-
+        /*
+         * while (k < channel.numberOfChildren()) { String file1 =
+         * channel.child(k).attributeValue("link"); String name =
+         * channel.child(k).attributeValue("title");
+         * idx.println("<li><a href=\"" + file1 + "\">" + name + "</a></li>");
+         * k++; }
+         */
         idx.println("</ul>");
         idx.println("</body>");
         idx.println("</html>");
