@@ -153,19 +153,25 @@ public final class RSSReader {
      * </pre>
      */
     private static void processItem(XMLTree item, SimpleWriter out) {
-        out.print(item.isTag());
-        out.print(item.label());
 
         assert item != null : "Violation of: item is not null";
 
         assert out != null : "Violation of: out is not null";
 
-         assert item.isTag() && item.label().equals("item") : "" +
-         "Violation of: the label root of item is an <item> tag";
-
+        assert item.isTag() && item.label().equals("item") : ""
+                + "Violation of: the label root of item is an <item> tag";
 
         assert out.isOpen() : "Violation of: out.is_open";
         int i = 0;
+        out.println("<tr>");
+        i = getChildElement(item, "pubDate");
+        if (i == -1) {
+            out.println("<td>none</td>");
+        } else {
+            String pDate = item.child(i).child(0).label();
+            out.println("<td>" + pDate + "</td>");
+        }
+
         i = getChildElement(item, "item");
         if (i == -1) {
             out.println("<td>ESPN - NBA</td>");
@@ -199,7 +205,6 @@ public final class RSSReader {
             }
         }
 
-         Ends the table row
         out.println("</tr>");
 
     }
@@ -217,15 +222,12 @@ public final class RSSReader {
         //out.println("Enter feed list: ");
         //XMLTree source = new XMLTree1(in.nextLine());
         XMLTree source = new XMLTree1("https://www.espn.com/espn/rss/nba/news");
-        source.display();
+        //XMLTree channel = source.child(0);
+        //source.display();
 
         String file = "index.html";
         SimpleWriter index = new SimpleWriter1L(file);
         int i = 0;
-        //while(i < source.numberOfChildren())
-        //{
-
-        //}
         String c = "channel";
         String t = "title";
         String d = "pubDate;";
@@ -237,12 +239,14 @@ public final class RSSReader {
          * channel.child(getChildElement(channel, d));
          */
         outputHeader(channel, index);
+        while (i < channel.numberOfChildren()) {
+            XMLTree item = channel.child(i);
+            if (item.label().equals("item")) {
+                processItem(item, index);
+            }
+            i++;
+        }
 
-        //processItem(channel, index);
-
-        index.println("<tr> <td> Wed, 15 Feb 2023 07:42:00 EST </td> <td> ESPN </td> <td> <a href="
-                        + "https://www.espn.com/nba/story/_/id/35662824/bucks-giannis-antetokounmpo-says-top-seed-matter"
-                        + "> Giannis Antetokounmpo helped the Bucks roll past the Celtics in overtime in a </a> </td></tr> ");
         outputFooter(index);
         index.close();
         in.close();
