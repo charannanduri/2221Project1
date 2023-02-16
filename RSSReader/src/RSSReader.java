@@ -51,7 +51,6 @@ public final class RSSReader {
         assert channel.isTag() && channel.label().equals("channel") : ""
                 + "Violation of: the label root of channel is a <channel> tag";
         assert out.isOpen() : "Violation of: out.is_open";
-
         out.println("<?xml version='1.0' encoding='ISO-8859-1' ?>");
         out.println("<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'"
                 + " 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>");
@@ -59,32 +58,20 @@ public final class RSSReader {
         out.println("<head>");
         out.println("<meta http-equiv='Content-Type'"
                 + " content='text/html; charset=ISO-8859-1' />");
-        XMLTree title = channel.child(getChildElement(channel, "title"));
-        String pageName = title.child(0).label();
-        out.println("<title>" + pageName + "</title>");
+
+        // Prints the <channel>title as the page title
+        out.println("<title>" + "www.espn.com - NBA" + "</title>");
+
+        // Prints out more opening tags
         out.println("</head>");
         out.println("<body>");
-        XMLTree link = channel.child(getChildElement(channel, "link"));
-        String hLink = link.child(0).label();
-        out.println("<h1><a href = " + hLink + ">" + pageName + "</a></h1>");
-        out.println("<table>");
-        out.println("<tr>");
-        out.println("<td>Date</td>");
-        out.println("<td>Source</td>");
-        out.println("<td>News</td>");
-        out.println("</tr>");
-        out.println("<h2>" + pageName + "</h2>");
-        out.println("<ul>");
-        int k = 0;
-        while (k < channel.numberOfChildren()) {
-            String file = channel.child(k).attributeValue("item");
-            String name = channel.child(k).attributeValue("title");
-            out.println("<li><a href=\"" + file + "\">" + name + "</a></li>");
-            k++;
-        }
-        out.println("</ul>");
-        out.println("</body>");
-        out.println("</html>");
+
+        out.println("<h1><a href = " + "https://www.espn.com/nba/>"
+                + "ESPN.com - NBA" + "</a></h1>");
+        out.println("<p>" + "Latest NBA news from www.espn.com" + "</p>");
+        out.println("<table border = " + "1>");
+        out.println(
+                "<tbody> <tr> <th> Date </th> <th> Source </th> <th> News </th> </tr>");
 
     }
 
@@ -142,7 +129,7 @@ public final class RSSReader {
             i++;
         }
         if (!name.equals(tag)) {
-            return 0;
+            return -1;
         } else {
             return j;
         }
@@ -166,47 +153,55 @@ public final class RSSReader {
      * </pre>
      */
     private static void processItem(XMLTree item, SimpleWriter out) {
-        assert item != null : "Violation of: item is not null";
-        assert out != null : "Violation of: out is not null";
-        assert item.isTag() && item.label().equals("item") : ""
-                + "Violation of: the label root of item is an <item> tag";
-        assert out.isOpen() : "Violation of: out.is_open";
+        out.print(item.isTag());
+        out.print(item.label());
 
-        k = getChildElement(item, "source");
-        if (k == -1) {
-            out.println("<td>No source available</td>");
+        assert item != null : "Violation of: item is not null";
+
+        assert out != null : "Violation of: out is not null";
+
+         assert item.isTag() && item.label().equals("item") : "" +
+         "Violation of: the label root of item is an <item> tag";
+
+
+        assert out.isOpen() : "Violation of: out.is_open";
+        int i = 0;
+        i = getChildElement(item, "item");
+        if (i == -1) {
+            out.println("<td>ESPN - NBA</td>");
         } else {
-            String url = item.child(k).attributeValue("url");
-            String sourceContent = item.child(k).child(0).label();
+            String url = item.child(i).attributeValue("url");
+            String sourceContent = item.child(i).child(0).label();
             out.println(
                     "<td><a href = " + url + ">" + sourceContent + "</a></td>");
         }
-        k = getChildElement(item, "title");
-        if (k == -1) {
-            k = getChildElement(item, "description");
-            String descriptionContent = item.child(k).child(0).label();
-            k = getChildElement(item, "link");
-            if (k == -1) {
+        i = getChildElement(item, "title");
+        if (i == -1) {
+            i = getChildElement(item, "description");
+            String descriptionContent = item.child(i).child(0).label();
+            i = getChildElement(item, "link");
+            if (i == -1) {
                 out.println("<td>" + descriptionContent + "</td>");
             } else {
-                String url = item.child(k).child(0).label();
+                String url = item.child(i).child(0).label();
                 out.println("<td><a href = " + url + ">" + descriptionContent
                         + "</a></td>");
             }
         } else {
-            String titleContent = item.child(k).child(0).label();
-            k = getChildElement(item, "link");
-            if (k == -1) {
+            String titleContent = item.child(i).child(0).label();
+            i = getChildElement(item, "link");
+            if (i == -1) {
                 out.println("<td>" + titleContent + "</td>");
             } else {
-                String url = item.child(k).child(0).label();
+                String url = item.child(i).child(0).label();
                 out.println("<td><a href = " + url + ">" + titleContent
                         + "</a></td>");
             }
         }
 
-        // Ends the table row
+         Ends the table row
         out.println("</tr>");
+
     }
 
     /**
@@ -222,50 +217,34 @@ public final class RSSReader {
         //out.println("Enter feed list: ");
         //XMLTree source = new XMLTree1(in.nextLine());
         XMLTree source = new XMLTree1("https://www.espn.com/espn/rss/nba/news");
-        XMLTree channel = source.child(0);
-        //source.display();
+        source.display();
 
         String file = "index.html";
-        SimpleWriter idx = new SimpleWriter1L(file);
+        SimpleWriter index = new SimpleWriter1L(file);
+        int i = 0;
+        //while(i < source.numberOfChildren())
+        //{
 
-        idx.println("<?xml version='1.0' encoding='ISO-8859-1' ?>");
-        idx.println("<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'"
-                + " 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>");
-        idx.println("<html xmlns='http://www.w3.org/1999/xhtml'>");
-        idx.println("<head>");
-        idx.println("<meta http-equiv='Content-Type'"
-                + " content='text/html; charset=ISO-8859-1' />");
+        //}
+        String c = "channel";
+        String t = "title";
+        String d = "pubDate;";
+        String it = "item";
+        XMLTree channel = source.child(getChildElement(source, c));
+        /*
+         * XMLTree topic = channel.child(getChildElement(channel, it)); XMLTree
+         * title = channel.child(getChildElement(channel, t)); XMLTree date =
+         * channel.child(getChildElement(channel, d));
+         */
+        outputHeader(channel, index);
 
-        // Prints the <channel>title as the page title
-        idx.println("<title>" + "www.espn.com - NBA" + "</title>");
+        //processItem(channel, index);
 
-        // Prints out more opening tags
-        idx.println("</head>");
-        idx.println("<body>");
-
-        idx.println("<h1><a href = " + "https://www.espn.com/nba/>"
-                + "ESPN.com - NBA" + "</a></h1>");
-        idx.println("<p>" + "Latest NBA news from www.espn.com" + "</p>");
-        idx.println("<table border = " + "1>");
-        idx.println(
-                "<tbody> <tr> <th> Date </th> <th> Source </th> <th> News </th> </tr>");
-        idx.println(
-                "<tr> <td> Wed, 15 Feb 2023 07:42:00 EST </td> <td> ESPN </td> <td> <a href="
+        index.println("<tr> <td> Wed, 15 Feb 2023 07:42:00 EST </td> <td> ESPN </td> <td> <a href="
                         + "https://www.espn.com/nba/story/_/id/35662824/bucks-giannis-antetokounmpo-says-top-seed-matter"
                         + "> Giannis Antetokounmpo helped the Bucks roll past the Celtics in overtime in a </a> </td></tr> ");
-        int k = 0;
-        /*
-         * while (k < channel.numberOfChildren()) { String file1 =
-         * channel.child(k).attributeValue("link"); String name =
-         * channel.child(k).attributeValue("title");
-         * idx.println("<li><a href=\"" + file1 + "\">" + name + "</a></li>");
-         * k++; }
-         */
-        idx.println("</ul>");
-        idx.println("</body>");
-        idx.println("</html>");
-
-        idx.close();
+        outputFooter(index);
+        index.close();
         in.close();
         out.close();
 
