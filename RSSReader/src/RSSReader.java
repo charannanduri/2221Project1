@@ -60,15 +60,22 @@ public final class RSSReader {
                 + " content='text/html; charset=ISO-8859-1' />");
 
         // Prints the <channel>title as the page title
-        out.println("<title>" + "www.espn.com - NBA" + "</title>");
+        String title = channel.child(getChildElement(channel, "title")).child(0)
+                .label();
+        ;
 
         // Prints out more opening tags
         out.println("</head>");
         out.println("<body>");
+        String link = channel.child(getChildElement(channel, "link")).child(0)
+                .toString();
+        String description = channel
+                .child(getChildElement(channel, "description")).child(0)
+                .toString();
+        out.println("<p>" + description + "</p>");
+        out.println("<h1><a href = " + "\"" + link + "\"" + ">" + title
+                + "</a></h1>");
 
-        out.println("<h1><a href = " + "https://www.espn.com/nba/>"
-                + "ESPN.com - NBA" + "</a></h1>");
-        out.println("<p>" + "Latest NBA news from www.espn.com" + "</p>");
         out.println("<table border = " + "1>");
         out.println(
                 "<tbody> <tr> <th> Date </th> <th> Source </th> <th> News </th> </tr>");
@@ -232,12 +239,26 @@ public final class RSSReader {
         String t = "title";
         String d = "pubDate;";
         String it = "item";
+
+        String version = null;
+        String root = source.label();
+        boolean tf = source.hasAttribute("version");
+        if (tf) {
+            version = source.attributeValue("version");
+        }
+        while (root != "rss" && version != "2.0") {
+            out.println("Not an RSS 2.0 feed.");
+            out.println("Enter a different RSS 2.0 feed:");
+            String feed = in.nextLine();
+            source = new XMLTree1(feed);
+            root = source.label();
+            tf = source.hasAttribute("version");
+            if (tf) {
+                version = source.attributeValue("version");
+            }
+        }
+
         XMLTree channel = source.child(getChildElement(source, c));
-        /*
-         * XMLTree topic = channel.child(getChildElement(channel, it)); XMLTree
-         * title = channel.child(getChildElement(channel, t)); XMLTree date =
-         * channel.child(getChildElement(channel, d));
-         */
         outputHeader(channel, index);
         while (i < channel.numberOfChildren()) {
             XMLTree item = channel.child(i);
