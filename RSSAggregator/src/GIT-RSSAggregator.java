@@ -215,11 +215,11 @@ public final class RSSAggregator {
         out.println("</tr>");
 
     }
-    
+
     /**
      * Processes one XML RSS (version 2.0) feed from a given URL converting it
      * into the corresponding HTML output file.
-     * 
+     *
      * @param url
      *            the URL of the RSS feed
      * @param file
@@ -232,48 +232,33 @@ public final class RSSAggregator {
      * [reads RSS feed from url, saves HTML document with table of news items
      *   to file, appends to out.content any needed messages]
      * </pre>
-    */
+     */
     private static void processFeed(String url, String file, SimpleWriter out) {
-        //XMLTree source = new XMLTree1(in.nextLine());
-        //String fileName = in.nextLine() + ".html";
-        //String c = "channel";
-        //String t = "title";
-        //String d = "pubDate;";
-        //String it = "item";
-        //String version = null;
-        int i = 0;
-        //XMLTree index = new XMLTree1(XMLFile);
-        //SimpleWriter index = new SimpleWriter1L(fileName);
-       // XMLTree channel = source.child(getChildElement(source, c));
-        
-        outputHeader(channel, index);
-        while (i < channel.numberOfChildren()) {
-            XMLTree item = channel.child(i);
-            if (item.label().equals("item")) {
-                processItem(item, index);
+        XMLTree index = new XMLTree1(url);
+        SimpleWriter outputFile = new SimpleWriter1L(file);
+        // check that the file is an rss 2.0 feed.
+        if(index.label().equals("rss") && (index.hasAttribute("version")))
+        {
+            XMLTree channel = index.child(0);
+            outputHeader(channel, outputFile);
+            for (k = 0; k < channel.numberOfChildren(); k++)
+            {
+                if(channel.child(k).label().equals("item"))
+                {
+                    processItem(channel.child(k), outputFile);
+                }
             }
-            i++;
+            outputFooter(outputFile);
         }
-        String root = source.label();
-        boolean tf = source.hasAttribute("version");
-        if (tf) {
-            version = source.attributeValue("version");
+        else
+        {
+           out.println("invalid file.")
         }
-        while (root != "rss" && version != "2.0") {
-            out.println("Not an RSS 2.0 feed.");
-            out.println("Enter a different RSS 2.0 feed:");
-            String feed = in.nextLine();
-            source = new XMLTree1(feed);
-            root = source.label();
-            tf = source.hasAttribute("version");
-            if (tf) {
-                version = source.attributeValue("version");
-            }
-        }
-        outputFooter(index);
-        index.close();
-    }
+        out.println("created file for " + index);
 
+
+
+    }
 
     /**
      * Main method.
@@ -284,20 +269,23 @@ public final class RSSAggregator {
     public static void main(String[] args) {
         SimpleReader in = new SimpleReader1L();
         SimpleWriter out = new SimpleWriter1L();
-        out.println("Enter an XML file name containing a list of RSS 2.0 feeds: ");
+        out.println(
+                "Enter an index XML file name containing a list of RSS 2.0 feeds: ");
         String XMLFile = in.nextLine();
+
+        //open new file to store the HTML content for the index page
+
         SimpleWriter outputFile = new SimpleWriter1L("index.html");
         XMLTree index = new XMLTree1(XMLFile);
-        for(int j = 0; j < index.numberOfChildren(); j++)
-        {
-            String name = index.child(j).attributeValue("file");
-            String name = index.child(j).attributeValue("file");
-            
-            
-        }]
-        
-         
-        processFeed();
+
+        //loop to iterate for j number of pages in the XML document.
+        for (int j = 0; j < index.numberOfChildren(); j++) {
+            String name = index.child(j).child(1).attributeValue("file");
+            String url = index.child(j).child(0).attributeValue("url");
+            processFeed(url, name, out);
+
+        }
+
         out.println("Enter feed list: ");
         out.println("Enter the ouput fime name, dont enter a file extension: ");
         in.close();
