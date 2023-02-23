@@ -51,7 +51,7 @@ public final class RSSAggregator {
         assert channel.isTag() && channel.label().equals("channel") : ""
                 + "Violation of: the label root of channel is a <channel> tag";
         assert out.isOpen() : "Violation of: out.is_open";
-        out.println("<?xml version='1.0' encoding='ISO-8859-1' ?>");
+        out.println("<?xml version='2.0' encoding='ISO-8859-1' ?>");
         out.println("<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'"
                 + " 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>");
         out.println("<html xmlns='http://www.w3.org/1999/xhtml'>");
@@ -59,22 +59,33 @@ public final class RSSAggregator {
         out.println("<meta http-equiv='Content-Type'"
                 + " content='text/html; charset=ISO-8859-1' />");
 
+        String title = " N/A ";
+        String description = "none";
+        int iTitle = getChildElement(channel, "title");
+        int iDesc = getChildElement(channel, "description");
         // Prints the <channel>title as the page title
-        String title = channel.child(getChildElement(channel, "title")).child(0)
-                .label();
-        ;
+        if (channel.child(iTitle).numberOfChildren() > 0) {
+            title = channel.child(getChildElement(channel, "title")).child(0)
+                    .label();
+        } else {
+            title = "None";
+        }
+        if (channel.child(iDesc).numberOfChildren() > 0) {
+            description = channel.child(getChildElement(channel, "description"))
+                    .child(0).toString();
+        } else {
+            description = "None";
+        }
+        String link = channel.child(getChildElement(channel, "link")).child(0)
+                .toString();
 
         // Prints out more opening tags
         out.println("</head>");
         out.println("<body>");
-        String link = channel.child(getChildElement(channel, "link")).child(0)
-                .toString();
-        String description = channel
-                .child(getChildElement(channel, "description")).child(0)
-                .toString();
-        out.println("<p>" + description + "</p>");
+
         out.println("<h1><a href = " + "\"" + link + "\"" + ">" + title
                 + "</a></h1>");
+        out.println("<p>" + description + "</p>");
 
         out.println("<table border = " + "1>");
         out.println(
@@ -126,20 +137,15 @@ public final class RSSAggregator {
         assert tag != null : "Violation of: tag is not null";
         assert xml.isTag() : "Violation of: the label root of xml is a tag";
 
-        int i = 0, j = 0;
-        String name = xml.child(i).label();
-        while (!name.equals(tag) && i < xml.numberOfChildren()) {
-            name = xml.child(i).label();
-            if (name.equals(tag)) {
-                j = i;
+        int i = -1, j = 0;
+        //String name = xml.child(i).label();
+        while (j < xml.numberOfChildren() && i == -1) {
+            if (xml.child(j).label().equals(tag)) {
+                i = j;
             }
-            i++;
+            j++;
         }
-        if (!name.equals(tag)) {
-            return -1;
-        } else {
-            return j;
-        }
+        return i;
     }
 
     /**
@@ -172,43 +178,55 @@ public final class RSSAggregator {
         int i = 0;
         out.println("<tr>");
         i = getChildElement(item, "pubDate");
-        if (i == -1) {
-            out.println("<td>none</td>");
+        if (i != -1) {
+            if (item.child(i).numberOfChildren() != 0) {
+                String pDate = item.child(i).child(0).label();
+                out.println("<td>" + pDate + "</td>");
+            }
         } else {
-            String pDate = item.child(i).child(0).label();
-            out.println("<td>" + pDate + "</td>");
+            out.println("<td> N/A </td>");
         }
 
         i = getChildElement(item, "item");
-        if (i == -1) {
-            out.println("<td>ESPN - NBA</td>");
+        if (i != -1) {
+            if (item.child(i).numberOfChildren() != 0) {
+                String source = item.child(i).child(0).label();
+                out.println("<td>" + source + "</td>");
+            }
         } else {
-            String url = item.child(i).attributeValue("url");
-            String sourceContent = item.child(i).child(0).label();
-            out.println(
-                    "<td><a href = " + url + ">" + sourceContent + "</a></td>");
+            i = getChildElement(item, "source");
+            if (i != -1) {
+                String source = item.child(i).child(0).label();
+                out.println("<td>" + source + "</td>");
+            } else {
+                out.println("<td> N/A </td>");
+            }
         }
+
         i = getChildElement(item, "title");
+        if (item.child(i).numberOfChildren() != 0) {
+            String title = item.child(i).child(0).label();
+        }
+
         if (i == -1) {
             i = getChildElement(item, "description");
-            String descriptionContent = item.child(i).child(0).label();
+            String description = item.child(i).child(0).label();
             i = getChildElement(item, "link");
             if (i == -1) {
-                out.println("<td>" + descriptionContent + "</td>");
+                out.println("<td>" + description + "</td>");
             } else {
                 String url = item.child(i).child(0).label();
-                out.println("<td><a href = " + url + ">" + descriptionContent
+                out.println("<td><a href = " + url + ">" + description
                         + "</a></td>");
             }
         } else {
-            String titleContent = item.child(i).child(0).label();
+            String title = item.child(i).child(0).label();
             i = getChildElement(item, "link");
             if (i == -1) {
-                out.println("<td>" + titleContent + "</td>");
+                out.println("<td>" + title + "</td>");
             } else {
                 String url = item.child(i).child(0).label();
-                out.println("<td><a href = " + url + ">" + titleContent
-                        + "</a></td>");
+                out.println("<td><a href = " + url + ">" + title + "</a></td>");
             }
         }
 
@@ -234,30 +252,22 @@ public final class RSSAggregator {
      * </pre>
      */
     private static void processFeed(String url, String file, SimpleWriter out) {
-        XMLTree index = new XMLTree1(url);
+        XMLTree source = new XMLTree1(url);
         SimpleWriter outputFile = new SimpleWriter1L(file);
         // check that the file is an rss 2.0 feed.
-        if(index.label().equals("rss") && (index.hasAttribute("version")))
-        {
-            XMLTree channel = index.child(0);
+        if (source.label().equals("rss") && (source.hasAttribute("version"))) {
+            XMLTree channel = source.child(0);
             outputHeader(channel, outputFile);
-            for (k = 0; k < channel.numberOfChildren(); k++)
-            {
-                if(channel.child(k).label().equals("item"))
-                {
+            for (int k = 0; k < channel.numberOfChildren(); k++) {
+                if (channel.child(k).label().equals("item")) {
                     processItem(channel.child(k), outputFile);
                 }
             }
             outputFooter(outputFile);
+        } else {
+            int i = 0;
         }
-        else
-        {
-           out.println("invalid file.")
-        }
-        out.println("created file for " + index);
-
-
-
+        out.println("created " + file);
     }
 
     /**
@@ -271,25 +281,40 @@ public final class RSSAggregator {
         SimpleWriter out = new SimpleWriter1L();
         out.println(
                 "Enter an index XML file name containing a list of RSS 2.0 feeds: ");
-        String XMLFile = in.nextLine();
+        String XML_File = in.nextLine();
 
         //open new file to store the HTML content for the index page
 
         SimpleWriter outputFile = new SimpleWriter1L("index.html");
-        XMLTree index = new XMLTree1(XMLFile);
+        XMLTree index = new XMLTree1(XML_File);
 
         //loop to iterate for j number of pages in the XML document.
-        for (int j = 0; j < index.numberOfChildren(); j++) {
-            String name = index.child(j).child(1).attributeValue("file");
-            String url = index.child(j).child(0).attributeValue("url");
+
+        for (int k = 0; k < index.numberOfChildren(); k++) {
+            //out.print(index.attri());
+            String name = index.child(k).attributeValue("file");
+            String url = index.child(k).attributeValue("url");
+            out.println("creating " + name + " from " + url);
             processFeed(url, name, out);
 
         }
 
-        out.println("Enter feed list: ");
-        out.println("Enter the ouput fime name, dont enter a file extension: ");
+        String title = index.attributeValue("title");
+        outputFile.println("<head> <title>" + title
+                + "</title> </head> <body> <head> <h2> " + title
+                + "</h2> </head>");
+        for (int k = 0; k < index.numberOfChildren(); k++) {
+            String name = index.child(k).attributeValue("name");
+            String fileName = index.child(k).attributeValue("file");
+            outputFile.print("<li> <p> <a href = " + "\"" + fileName + "\""
+                    + ">" + name + "</a> </p> </li> ");
+        }
+        outputFile.print("</ul> </body> </html>");
+        out.println("complete.");
+
         in.close();
         out.close();
+        outputFile.close();
 
     }
 
