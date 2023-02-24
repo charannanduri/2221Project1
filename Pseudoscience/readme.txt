@@ -1,3 +1,6 @@
+This GitHub code is for my (Charan's) personal use. do not copy this code or anything in this repository. I am not responsible
+for any resulting action by any governing body based upon the use of my (Charan's) personal repository.
+
 Project: Pseudoscience
 
 Objectives
