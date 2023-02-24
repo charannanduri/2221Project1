@@ -1,3 +1,6 @@
+This GitHub code is for my (Charan's) personal use. do not copy this code or anything in this repository. I am not responsible
+for any resulting action by any governing body based upon the use of my (Charan's) personal repository.
+
 Project: RSS News Reader
 
 Important note: The next project will build directly on your solution to this project. It is essential that you get a decent and working solution for this project before you start working on the next one. Please do not delay work on this project because a failure on this one is likely to result in a failure on the next one as well.
