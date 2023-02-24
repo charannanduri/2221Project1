@@ -19,16 +19,7 @@ Note: this is the last project description that will include instructions about 
 Create a new Eclipse project by copying ProjectTemplate (if needed, see Creating a New Project from a Project Template for details). Name the new project Newton.
 Open the src folder of this project and then open (default package). As a starting point you should use ProgramWithIOAndStaticMethod.java. Rename it Newton1 and delete the other files from the project (if needed, see Creating a Program from a Skeleton (also Renaming a Java Program) for details).
 Edit Newton1.java to satisfy the problem requirements stated above, including updating comments appropriately. Estimating the square root should be done in a static method declared as follows:
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
+
 /**
  * Computes estimate of square root of x to within relative error 0.01%.
  * 
