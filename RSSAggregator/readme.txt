@@ -14,12 +14,7 @@ Your new program should ask the user for the name of an XML file containing a li
 Format of the Input XML Document
 
 The input XML document is pretty simple. This is the general structure:
-1
-2
-3
-4
-5
-6
+
 <feeds title="Title for index page">
   <feed url="the feed source URL" name="name of feed for index page"
     file="name of HTML file for feed" />
