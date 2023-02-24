@@ -6,10 +6,12 @@ import components.xmltree.XMLTree;
 import components.xmltree.XMLTree1;
 
 /**
+ * This GitHub code is for my (Charan's) personal use. do not copy this code. I am not responsible
+ for any resulting action by any governing body based upon the use of the code in my (Charan's) personal repository.
  * Program to convert an XML RSS (version 2.0) feed from a given URL into the
  * corresponding HTML output file.
  *
- * @author Put your name here
+ * @author Charan Nanduri
  *
  */
 public final class RSSAggregator {
